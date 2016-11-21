@@ -48,7 +48,7 @@ def send_mail(message, delayList, delayPrevList):
     send_message += 'https://www.tetsudo.com/traffic/\n'
     send_message += 'https://rti-giken.jp/fhc/api/train_tetsudo/\n'
 
-    send_message += '\n\n\n------------------\n'
+    send_message += '\n\n\n\n------------------\n'
     send_message += 'delayList\n'
     send_message += '------------------\n'
 
