@@ -1,0 +1,10 @@
+requests
+requests-2.12.1.dist-info
+
+__pycache__
+pytz
+pytz-2016.7.dist-info
+
+.idea/**
+
+._*
