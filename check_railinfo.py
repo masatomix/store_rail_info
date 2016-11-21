@@ -22,8 +22,8 @@ def lambda_handler(event, context):
 
     if (compare(delayList, delayPrevList)):
         print('DIFFなし')
-        message = '電車運行情報で更新情報なし'
-        send_mail(message,delayList,delayPrevList)
+        #message = '電車運行情報で更新情報なし'
+        #send_mail(message,delayList,delayPrevList)
     else:
         print('DIFFアリ')
         message = '電車運行情報で更新情報あり'
@@ -42,13 +42,13 @@ def send_mail(message, delayList, delayPrevList):
 
     for i, obj in enumerate(delayList):
         update_time = datetime.fromtimestamp(obj['lastupdate_gmt'],tz=jst)
-        send_message += '・%s ,%s\n' % (obj['name'], update_time)
+        send_message += '・%s ,%s\n' % (obj['name'], update_time.strftime("%Y/%m/%d %H:%M:%S"))
 
     send_message += '\n'
-    send_message += 'https://www.tetsudo.com/\n'
+    send_message += 'https://www.tetsudo.com/traffic/\n'
     send_message += 'https://rti-giken.jp/fhc/api/train_tetsudo/\n'
 
-    send_message += '------------------\n'
+    send_message += '\n\n\n------------------\n'
     send_message += 'delayList\n'
     send_message += '------------------\n'
 
@@ -114,7 +114,9 @@ def compare(delayList, delayPrevList):
 def main():
     jst = pytz.timezone('Asia/Tokyo')
     print(datetime.fromtimestamp(1479460502))
-    print(datetime.fromtimestamp(1479460502,tz=jst))
+    date = datetime.fromtimestamp(1479460502,tz=jst)
+    print(date)
+    print(date.strftime("%Y/%m/%d %H:%M:%S"))
 
 
 if __name__ == "__main__":
