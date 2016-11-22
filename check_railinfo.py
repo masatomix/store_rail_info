@@ -35,16 +35,16 @@ def lambda_handler(event, context):
 
 
 def send_mail(message, delayList, delayPrevList):
-    send_message = '遅延情報\n\n'
-    send_message += '　路線,更新時刻\n'
+    send_message = '電車運行情報\n\n'
 
     jst = pytz.timezone('Asia/Tokyo')
 
     for i, obj in enumerate(delayList):
         update_time = datetime.fromtimestamp(obj['lastupdate_gmt'],tz=jst)
-        send_message += '・%s ,%s\n' % (obj['name'], update_time.strftime("%Y/%m/%d %H:%M:%S"))
+        send_message += '・%s (%s)\n' % (obj['name'], update_time.strftime("%H:%M"))
 
     send_message += '\n'
+    send_message += '(カッコは更新時刻)\n'
     send_message += 'https://www.tetsudo.com/traffic/\n'
     send_message += 'https://rti-giken.jp/fhc/api/train_tetsudo/\n'
 
