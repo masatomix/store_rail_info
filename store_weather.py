@@ -5,7 +5,9 @@ import os
 import json
 import boto3
 import requests
-from my_aws_utils import store_json_to_s3
+from datetime import datetime
+import pytz
+from my_aws_utils import store_json_to_s3,get_json_from_s3
 
 
 # import itertools
@@ -47,19 +49,65 @@ def storeWeather(cityCodes):
         result = json.dumps(r.json(), ensure_ascii=False, indent=4, sort_keys=True, separators=(',', ': '))
         file = 'forecast_' + cityCode + '.json'
         store_json_to_s3('nu.mine.kino.temperature', file, result)
+        createTemp('nu.mine.kino.temperature', cityCode, r.json())
 
 
-# def storeJSON2S3(bucketName,key,jsonData):
-# 	s3 = boto3.resource('s3')
-# 	bucket = s3.Bucket(bucketName)
-#
-# 	obj = bucket.Object(key)
-#
-# 	response = obj.put(
-# 		Body=jsonData.encode('utf-8'),
-# 		ContentEncoding='utf-8',
-# 		ContentType='application/json'
-# 	)
+def createTemp(bucket_name, cityCode, json_data):
+    try:
+        temp_series = []
+        file = 'temperature_' + cityCode + '.json'
+        if(not(exists(bucket_name,file))):
+            print("not exists");
+        else:
+            print("exist");
+            temp_series = get_json_from_s3('nu.mine.kino.temperature',file)
+            # get_json_from_s3('nu.mine.kino.temperature',file)
+
+        data0 = get_temperature_info(json_data,0)
+        data1 = get_temperature_info(json_data,1)
+        print(data0)
+        print(data1)
+        temp_series.append(data0)
+        temp_series.append(data0)
+
+        result = json.dumps(temp_series, ensure_ascii=False, indent=4, sort_keys=True, separators=(',', ': '))
+        store_json_to_s3('nu.mine.kino.temperature', file, result)
+    except Exception as e:
+        print(file + 'の処理でエラーが発生しました。')
+        print(e)
+
+
+
+def exists(bucket_name, key) :
+    s3client = Session().client('s3')
+    return 'Contents' in s3client.list_objects(Prefix=key, Bucket=bucket_name)
+
+
+
+def get_temperature_info(weatherjson,index):
+    dateStr = weatherjson['forecasts'][index]['date']
+    temp = weatherjson['forecasts'][index]['temperature']
+
+    min = None
+    max = None
+
+    if(temp['min'] != None):
+        min = temp['min']['celsius']
+    if(temp['max'] != None):
+        max = temp['max']['celsius']
+
+    jst = pytz.timezone('Asia/Tokyo')
+    updateDateStr = datetime.now(tz=jst).strftime('%Y/%m/%d %H:%M')
+
+    return {
+        'date':dateStr,
+        'updateDate':updateDateStr,
+        'temperature':{
+            'min':min,
+            'max':max
+        }
+    }
+
 
 
 def createCityNames():
