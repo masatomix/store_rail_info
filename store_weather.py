@@ -68,7 +68,7 @@ def createTemp(bucket_name, cityCode, json_data):
         print(data0)
         print(data1)
         temp_series.append(data0)
-        temp_series.append(data0)
+        temp_series.append(data1)
 
         result = json.dumps(temp_series, ensure_ascii=False, indent=4, sort_keys=True, separators=(',', ': '))
         store_json_to_s3('nu.mine.kino.temperature', file, result)
