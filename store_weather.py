@@ -145,9 +145,13 @@ def get_temperature_info(weatherjson,index):
     jst = pytz.timezone('Asia/Tokyo')
     updateDateStr = datetime.now(tz=jst).strftime('%Y/%m/%d %H:%M')
 
+    # 天気情報自体の更新日付
+    originalUpdateDate = weatherjson['publicTime']
+
     return {
         'date':dateStr,
         'updateDate':updateDateStr,
+        'originalUpdateDate': originalUpdateDate,
         'temperature':{
             'min':min,
             'max':max
