@@ -46,27 +46,26 @@ def storeWeather(cityCodes):
             'city': cityCode
         }
         r = requests.get('http://weather.livedoor.com/forecast/webservice/json/v1', params=q)
-        result = json.dumps(r.json(), ensure_ascii=False, indent=4, sort_keys=True, separators=(',', ': '))
+        obj = r.json()
+        result = json.dumps(obj, ensure_ascii=False, indent=4, sort_keys=True, separators=(',', ': '))
         file = 'forecast_' + cityCode + '.json'
         store_json_to_s3('nu.mine.kino.temperature', file, result)
-        createTemp('nu.mine.kino.temperature', cityCode, r.json())
+
+        createTemp('nu.mine.kino.temperature', cityCode, obj)
+        create_temperature_info_list('nu.mine.kino.temperature', cityCode, obj)
 
 
 def createTemp(bucket_name, cityCode, json_data):
     try:
         temp_series = []
-        file = 'temperature_' + cityCode + '.json'
-        if(not(exists(bucket_name,file))):
-            print("not exists");
-        else:
-            print("exist");
-            temp_series = get_json_from_s3('nu.mine.kino.temperature',file)
-            # get_json_from_s3('nu.mine.kino.temperature',file)
-
         data0 = get_temperature_info(json_data,0)
         data1 = get_temperature_info(json_data,1)
         print(data0)
         print(data1)
+        file = 'new_temperature_' + cityCode + '.json'
+        if(exists(bucket_name,file)):
+            print("exist");
+            temp_series = get_json_from_s3('nu.mine.kino.temperature',file)
         temp_series.append(data0)
         temp_series.append(data1)
 
@@ -77,6 +76,52 @@ def createTemp(bucket_name, cityCode, json_data):
         print(e)
 
 
+def create_temperature_info_list(bucket_name,cityCode,json_data):
+    '''
+    以下、本当の処理。
+    '''
+    try:
+        data0 = get_temperature_info(json_data,0)
+        data1 = get_temperature_info(json_data,1)
+        print(data0)
+        print(data1)
+
+        temp_series = []
+        file = 'temperature_' + cityCode + '.json'
+        if(exists(bucket_name,file)):
+            print("exist");
+            temp_series = get_json_from_s3('nu.mine.kino.temperature',file)
+
+        '''
+        自分と異なる日付のデータをとってきて、自分をAppend。
+        '''
+        if(is_replace_data(data0)):
+            fResults0 = replace_temperature_info(data0,temp_series)
+        else:
+            fResults0 = temp_series
+        if(is_replace_data(data1)):
+            fResults1 = replace_temperature_info(data1,fResults0)
+        else:
+            fResults1 = fResults0
+
+        result = json.dumps(fResults1, ensure_ascii=False, indent=4, sort_keys=True, separators=(',', ': '))
+        store_json_to_s3('nu.mine.kino.temperature', file, result)
+    except Exception as e:
+        print(file + 'の処理でエラーが発生しました。')
+        print(e)
+
+
+def is_replace_data(target):
+    return True
+
+def replace_temperature_info(target,list):
+    '''
+    自分と異なる日付のデータをとってきて、自分をAppend。
+    '''
+    target_date = target['date']
+    filtered_results = [item  for item in list if item['date'] != target_date]
+    filtered_results.append(target)
+    return filtered_results
 
 def exists(bucket_name, key) :
     s3client = Session().client('s3')
