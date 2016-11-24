@@ -52,7 +52,7 @@ def storeWeather(cityCodes):
         store_json_to_s3('nu.mine.kino.temperature', file, result)
 
         createTemp('nu.mine.kino.temperature', cityCode, obj)
-        create_temperature_info_list('nu.mine.kino.temperature', cityCode, obj)
+#        create_temperature_info_list('nu.mine.kino.temperature', cityCode, obj)
 
 
 def createTemp(bucket_name, cityCode, json_data):

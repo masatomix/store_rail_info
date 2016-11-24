@@ -9,12 +9,19 @@ from datetime import datetime
 import pytz
 from my_aws_utils import store_json_to_s3,get_json_from_s3
 
-def lambda_handler(event, context):
-    bucket_name = 'nu.mine.kino.temperature'
-    cityCode = ''  #キー名から、cityCodeを抽出。temperature_130010.json → 130010
-    json_data = '' # r.json() などで生成されるオブジェクトデータ。Body文字列からオブジェクト作ればいいかな。
 
-    #create_temperature_info_list(bucket_name,cityCode,json_data)
+def lambda_handler(event, context):
+    source = event['Records'][0]['s3']['object']['key']
+    #source = 'forecast_130010.json'
+    city_code = source[len('forecast_'):-5]  #キー名から、city_codeを抽出。temperature_130010.json → 130010
+    bucket_name = event['Records'][0]['s3']['bucket']['name']
+
+    json_data = get_json_from_s3(bucket_name, source)
+    print(bucket_name)
+    print(city_code)
+    #print(key)
+    #print(json_data)
+    create_temperature_info_list(bucket_name,city_code,json_data)
 
 
 def create_temperature_info_list(bucket_name,cityCode,json_data):
