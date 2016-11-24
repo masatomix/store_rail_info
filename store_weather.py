@@ -112,7 +112,8 @@ def create_temperature_info_list(bucket_name,cityCode,json_data):
 
 
 def is_replace_data(target):
-    return True
+    return target['temperature']['max']!= None and target['temperature']['min']!= None
+
 
 def replace_temperature_info(target,list):
     '''
