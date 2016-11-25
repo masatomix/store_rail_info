@@ -1,10 +1,8 @@
 # coding:utf-8
 
 from boto3.session import Session
-import os
 import json
 import boto3
-import requests
 from datetime import datetime
 import pytz
 from my_aws_utils import store_json_to_s3,get_json_from_s3
@@ -38,7 +36,7 @@ def create_temperature_info_list(bucket_name,cityCode,json_data):
         file = 'temperature_' + cityCode + '.json'
         if(exists(bucket_name,file)):
             print("exist");
-            temp_series = get_json_from_s3('nu.mine.kino.temperature',file)
+            temp_series = get_json_from_s3(bucket_name,file)
 
         '''
         自分と異なる日付のデータをとってきて、自分をAppend。
@@ -53,7 +51,7 @@ def create_temperature_info_list(bucket_name,cityCode,json_data):
             fResults1 = fResults0
 
         result = json.dumps(fResults1, ensure_ascii=False, indent=4, sort_keys=True, separators=(',', ': '))
-        store_json_to_s3('nu.mine.kino.temperature', file, result)
+        store_json_to_s3(bucket_name, file, result)
     except Exception as e:
         print(file + 'の処理でエラーが発生しました。')
         print(e)
