@@ -21,11 +21,11 @@ def lambda_handler(event, context):
     #print(json_data)
     create_temperature_info_list(bucket_name,city_code,json_data)
 
-
 def create_temperature_info_list(bucket_name,cityCode,json_data):
     '''
     以下、本当の処理。
     '''
+    file = 'temperature_' + cityCode + '.json'
     try:
         data0 = get_temperature_info(json_data,0)
         data1 = get_temperature_info(json_data,1)
@@ -33,7 +33,6 @@ def create_temperature_info_list(bucket_name,cityCode,json_data):
         print(data1)
 
         temp_series = []
-        file = 'temperature_' + cityCode + '.json'
         if(exists(bucket_name,file)):
             print("exist");
             temp_series = get_json_from_s3(bucket_name,file)
@@ -84,9 +83,9 @@ def get_temperature_info(weatherjson,index):
     max = None
 
     if(temp['min'] != None):
-        min = temp['min']['celsius']
+        min = float(temp['min']['celsius'])
     if(temp['max'] != None):
-        max = temp['max']['celsius']
+        max = float(temp['max']['celsius'])
 
     jst = pytz.timezone('Asia/Tokyo')
     updateDateStr = datetime.now(tz=jst).strftime('%Y/%m/%d %H:%M')
@@ -104,6 +103,31 @@ def get_temperature_info(weatherjson,index):
         }
     }
 
+
+
 if __name__ == "__main__":
-    lambda_handler('', '')
+    event_str ='''
+{
+  "Records": [
+    {
+      "s3": {
+        "configurationId": "testConfigRule",
+        "object": {
+          "key": "forecast_130010.json"
+        },
+        "bucket": {
+          "name": "nu.mine.kino.temperature"
+        }
+      }
+    }
+  ]
+}'''
+    event = json.loads(event_str)
+    json_data = get_json_from_s3("nu.mine.kino.temperature", "temperature_130010.json")
+
+    for record in json_data:
+        print(record['temperature']['max'])
+        print(record['temperature']['min'])
+
+    #lambda_handler(event, '')
     # create_temperature_info_list()
