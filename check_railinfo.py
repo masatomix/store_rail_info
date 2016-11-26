@@ -93,21 +93,42 @@ def compare(delayList, delayPrevList):
 
     # サイズがおなじ場合、now側で、For文回す
     for i, delay in enumerate(delayList):
-        nowName = delay['name']
-        print(nowName, ' で処理開始')
-        matchFlag = False
+        print(delay['name'], ' で処理開始')
+        matchFlag = containsRailInfo(delay,delayList)
 
         # 一つづつもってきて、名前があるかを比較
-        for j, delayPrev in enumerate(delayPrevList):
-            prevName = delayPrev['name']
-            if (nowName == prevName):
-                matchFlag = True
+        #for delayPrev in delayPrevList:
+        #    matchFlag = compareRailInfo(delay,delayPrev)
 
-        # for j をくぐり抜けて、まだFalseだったら 一致するものがなかったと言うこと
+        # containsRailInfo をくぐり抜けて、Falseだったら 一致するものがなかったということ
         if (not (matchFlag)):
             return False
 
     return True
+
+
+def compareRailInfo(a,b):
+    '''
+    引数のRailInfoオブジェクトを比較する。name 属性がおなじかどうか。
+    :param a:
+    :param b:
+    :return:
+    '''
+    return a['name']==b['name']
+
+
+def containsRailInfo(target,list):
+    '''
+    引数のRailInfoオブジェクトを比較する。含まれているかどうかをTrue/Falseで。
+    :param target:
+    :param list:
+    :return:
+    '''
+    for element in list:
+        if(compareRailInfo(target,element)):
+            return True
+    return False
+
 
 
 
@@ -117,6 +138,42 @@ def main():
     date = datetime.fromtimestamp(1479460502,tz=jst)
     print(date)
     print(date.strftime("%Y/%m/%d %H:%M:%S"))
+    a_test()
+
+
+def a_test():
+    jsonStr1 = '''
+    {
+        "lastupdate_gmt": 1479471904,
+        "name": "京急線",
+        "company": "京急電鉄",
+        "source": "鉄道com RSSa"
+    }
+    '''
+    jsonStr2 = '''
+    [
+        {
+            "company": "都営地下鉄",
+            "lastupdate_gmt": 1479472082,
+            "name": "浅草線",
+            "source": "鉄道com RSS"
+        },
+        {
+            "company": "京急電鉄",
+            "lastupdate_gmt": 1479471904,
+            "name": "京急線",
+            "source": "鉄道com RSS"
+        }
+    ]
+    '''
+
+
+    target = json.loads(jsonStr1)
+    list = json.loads(jsonStr2)
+
+    print(containsRailInfo(target,list))
+
+
 
 
 if __name__ == "__main__":
