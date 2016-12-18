@@ -3,11 +3,15 @@
 from boto3.session import Session
 
 import json
+import ConfigParser
 import boto3
 import pytz
 from datetime import datetime, timedelta
 from my_aws_utils import store_json_to_s3, get_json_from_s3
 
+
+config = ConfigParser.SafeConfigParser()
+config.read('./config/config.ini')
 
 def lambda_handler(event, context):
     bucket_name = 'nu.mine.kino.temperature'
@@ -31,7 +35,7 @@ def lambda_handler(event, context):
     send_message = '気温情報\n\n'
     send_message += today_str+' :' + today_data_str + ' ave:' +str(mean([today_data['temperature']['max'],today_data['temperature']['min']])) + '\n'
     send_message += yesterday_str+' :' + yesterday_data_str + ' ave:' + str(mean([yesterday_data['temperature']['max'],yesterday_data['temperature']['min']])) + '\n'
-    topic = 'arn:aws:sns:ap-northeast-1:xxxxxxxxxxxx:xxxxxxx'
+    topic = config.get('aws', 'topic')
     subject = today_str + ' の気温情報'
 
     print(send_message)
