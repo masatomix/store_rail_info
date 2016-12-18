@@ -1,0 +1,11 @@
+# コメントアウトも出来ます
+# 「 = 」前後にスペースがあってもなくても問題なし
+# 区切りは「 = 」でも「 : 」可
+
+[aws]
+topic : arn:aws:sns:ap-northeast-1:xxxxxxxxxxxx:xxxxxxx
+
+
+[slack]
+bot_url : /xxxxxxxxx/xxxxxxxxx/xxxxxxxxxxxxxxxxxxxxxxxx
+

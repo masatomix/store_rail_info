@@ -2,15 +2,18 @@
 
 from boto3.session import Session
 import os
+import ConfigParser
 import json
-#import datetime
+# import datetime
 from datetime import datetime, timedelta
 import pytz
 import boto3
 import requests
 from myutils import contains
-from my_aws_utils import store_json_to_s3,get_json_from_s3
+from my_aws_utils import store_json_to_s3, get_json_from_s3
 
+config = ConfigParser.SafeConfigParser()
+config.read('./config/config.ini')
 
 bucket_name = 'nu.mine.kino.temperature'
 
@@ -22,8 +25,8 @@ def lambda_handler(event, context):
 
     if (compare(delayList, delayPrevList)):
         print('DIFFなし')
-        #message = '電車運行情報で更新情報なし'
-        #send_mail(message,delayList,delayPrevList)
+        # message = '電車運行情報で更新情報なし'
+        # send_mail(message, delayList, delayPrevList)
     else:
         print('DIFFアリ')
         message = '電車運行情報で更新情報あり'
@@ -40,7 +43,7 @@ def send_mail(message, delayList, delayPrevList):
     jst = pytz.timezone('Asia/Tokyo')
 
     for i, obj in enumerate(delayList):
-        update_time = datetime.fromtimestamp(obj['lastupdate_gmt'],tz=jst)
+        update_time = datetime.fromtimestamp(obj['lastupdate_gmt'], tz=jst)
         send_message += '・%s (%s)\n' % (obj['name'], update_time.strftime("%H:%M"))
 
     send_message += '\n'
@@ -56,7 +59,6 @@ def send_mail(message, delayList, delayPrevList):
         send_message += json.dumps(obj, ensure_ascii=False) + '\n'
 
     send_message += '\n'
-
     send_message += 'delayPrevList\n'
     send_message += '------------------\n'
 
@@ -64,17 +66,30 @@ def send_mail(message, delayList, delayPrevList):
         send_message += json.dumps(obj, ensure_ascii=False) + '\n'
 
     send_message += '------------------\n'
-    topic = 'arn:aws:sns:ap-northeast-1:xxxxxxxxxxxx:xxxxxxx'
-    subject = message
-    region = 'ap-northeast-1'
 
-    sns = boto3.client('sns')
-    response = sns.publish(
-        TopicArn=topic,
-        Message=send_message,
-        Subject=subject,
-        MessageStructure='Raw'
-    )
+    # topic = config.get('aws', 'topic')
+    # subject = message
+    # region = 'ap-northeast-1'
+    #
+    # sns = boto3.client('sns')
+    # response = sns.publish(
+    #     TopicArn=topic,
+    #     Message=send_message,
+    #     Subject=subject,
+    #     MessageStructure='Raw'
+    # )
+
+    send_slack(send_message)
+
+
+def send_slack(message):
+
+    url = 'https://hooks.slack.com/services' + config.get('slack', 'bot_url')
+    headers = {
+        'Content-Type': 'application/json'
+    }
+    payload = {"text": message, "channel": "#rail_info", }
+    requests.post(url, data=json.dumps(payload), headers=headers)
 
 
 def compare(delayList, delayPrevList):
@@ -94,10 +109,10 @@ def compare(delayList, delayPrevList):
     # サイズがおなじ場合、now側で、For文回す
     for i, delay in enumerate(delayList):
         print(delay['name'], ' で処理開始')
-        matchFlag = containsRailInfo(delay,delayList)
+        matchFlag = containsRailInfo(delay, delayList)
 
         # 一つづつもってきて、名前があるかを比較
-        #for delayPrev in delayPrevList:
+        # for delayPrev in delayPrevList:
         #    matchFlag = compareRailInfo(delay,delayPrev)
 
         # containsRailInfo をくぐり抜けて、Falseだったら 一致するものがなかったということ
@@ -107,17 +122,17 @@ def compare(delayList, delayPrevList):
     return True
 
 
-def compareRailInfo(a,b):
+def compareRailInfo(a, b):
     '''
     引数のRailInfoオブジェクトを比較する。name 属性がおなじかどうか。
     :param a:
     :param b:
     :return:
     '''
-    return a['name']==b['name']
+    return a['name'] == b['name']
 
 
-def containsRailInfo(target,list):
+def containsRailInfo(target, list):
     '''
     引数のRailInfoオブジェクトを比較する。含まれているかどうかをTrue/Falseで。
     :param target:
@@ -125,17 +140,15 @@ def containsRailInfo(target,list):
     :return:
     '''
     for element in list:
-        if(compareRailInfo(target,element)):
+        if (compareRailInfo(target, element)):
             return True
     return False
-
-
 
 
 def main():
     jst = pytz.timezone('Asia/Tokyo')
     print(datetime.fromtimestamp(1479460502))
-    date = datetime.fromtimestamp(1479460502,tz=jst)
+    date = datetime.fromtimestamp(1479460502, tz=jst)
     print(date)
     print(date.strftime("%Y/%m/%d %H:%M:%S"))
     a_test()
@@ -167,15 +180,12 @@ def a_test():
     ]
     '''
 
-
     target = json.loads(jsonStr1)
     list = json.loads(jsonStr2)
 
-    print(containsRailInfo(target,list))
-
-
+    print(containsRailInfo(target, list))
 
 
 if __name__ == "__main__":
-    #lambda_handler('','')
-    main()
+    lambda_handler('', '')
+    # main()
