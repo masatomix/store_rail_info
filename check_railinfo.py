@@ -51,21 +51,21 @@ def send_mail(message, delayList, delayPrevList):
     send_message += 'https://www.tetsudo.com/traffic/\n'
     send_message += 'https://rti-giken.jp/fhc/api/train_tetsudo/\n'
 
-    send_message += '\n\n\n\n------------------\n'
-    send_message += 'delayList\n'
-    send_message += '------------------\n'
-
-    for i, obj in enumerate(delayList):
-        send_message += json.dumps(obj, ensure_ascii=False) + '\n'
-
-    send_message += '\n'
-    send_message += 'delayPrevList\n'
-    send_message += '------------------\n'
-
-    for i, obj in enumerate(delayPrevList):
-        send_message += json.dumps(obj, ensure_ascii=False) + '\n'
-
-    send_message += '------------------\n'
+    # send_message += '\n\n\n\n------------------\n'
+    # send_message += 'delayList\n'
+    # send_message += '------------------\n'
+    #
+    # for i, obj in enumerate(delayList):
+    #     send_message += json.dumps(obj, ensure_ascii=False) + '\n'
+    #
+    # send_message += '\n'
+    # send_message += 'delayPrevList\n'
+    # send_message += '------------------\n'
+    #
+    # for i, obj in enumerate(delayPrevList):
+    #     send_message += json.dumps(obj, ensure_ascii=False) + '\n'
+    #
+    # send_message += '------------------\n'
 
     # topic = config.get('aws', 'topic')
     # subject = message
